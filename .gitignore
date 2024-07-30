@@ -1,0 +1,2 @@
+# Ignore the generated sqlc folder
+# /db/sqlc/
