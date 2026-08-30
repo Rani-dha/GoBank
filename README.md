@@ -2,9 +2,7 @@
 
 Banking system developed using Golang!
 
-**A minimal, REST-only Gin server** — register, login, create accounts, list accounts, transfer money, all behind JWT/PASETO bearer auth. No gRPC, no Redis, no email worker, no frontend.
-
-> This repo used to also have a gRPC/gateway layer, a Redis-backed async email worker, and a Vue frontend calling both. That code (`gapi/`, `pb/`, `proto/`, `worker/`, `mail/`, `doc/`, `frontend/`, `val/`) has been removed, along with the now-unused dependencies in `go.mod` (`go mod tidy`'d down accordingly) — this repo is REST-API-only now. See "Restoring the full-featured version" at the bottom if you want any of it back; it's recoverable from git history, not gone for good.
+A REST API for a simple banking system — register, login, create accounts, list accounts, transfer money, all behind JWT/PASETO bearer auth.
 
 ## Stack
 
@@ -134,7 +132,3 @@ go test ./...
 ```
 
 Requires Postgres reachable via `DB_SOURCE` in `app.env`. All packages pass clean — `go test ./...` -> `GoBank/api`, `GoBank/db/sqlc`, `GoBank/token`, `GoBank/util` all `ok`.
-
-## Restoring the full-featured version
-
-Before this REST-only demo, `main.go` started a gRPC server (`:9090`), an HTTP gateway with Swagger docs (`:8080`), this same REST API on a separate port (`:8081`), and a Redis-backed async email worker — all four in one process via `errgroup` — with a Vue frontend (`frontend/`) as a separate process calling both HTTP ports. Everything for that (`gapi/`, `pb/`, `proto/`, `worker/`, `mail/`, `doc/`, `frontend/`, `val/`, plus the fuller `main.go` and `go.mod`) is recoverable from commit `240018f` — e.g. `git show 240018f:main.go` to see it, or `git checkout 240018f -- gapi pb proto worker mail doc frontend val main.go go.mod go.sum` to bring it all back.
