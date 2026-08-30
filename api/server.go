@@ -7,7 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	db "GoBank/db/sqlc"
+	_ "GoBank/docs" // generated Swagger spec, registered via its init()
 	"GoBank/token"
 	"GoBank/util"
 )
@@ -55,6 +58,8 @@ func (server *Server) setupRouter() {
 	authRoutes.GET("/accounts/lookup", server.lookupAccount)
 
 	authRoutes.POST("/transfers", server.createTransfer)
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	server.router = router
 }

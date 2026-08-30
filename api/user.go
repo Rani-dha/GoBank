@@ -37,6 +37,17 @@ func newUserResponse(user db.User) userResponse {
 	}
 }
 
+// createUser registers a new user.
+// @Summary Register a new user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body createUserRequest true "New user"
+// @Success 200 {object} userResponse
+// @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string "username or email already taken"
+// @Failure 500 {object} map[string]string
+// @Router /users [post]
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -85,6 +96,18 @@ type loginUserResponse struct {
 	User                  userResponse `json:"user"`
 }
 
+// loginUser authenticates a user and issues an access/refresh token pair.
+// @Summary Log in
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body loginUserRequest true "Credentials"
+// @Success 200 {object} loginUserResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string "wrong password"
+// @Failure 404 {object} map[string]string "user not found"
+// @Failure 500 {object} map[string]string
+// @Router /users/login [post]
 func (server *Server) loginUser(ctx *gin.Context) {
 	var req loginUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {

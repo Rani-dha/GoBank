@@ -13,6 +13,19 @@ type createAccountRequest struct {
 	Currency string `json:"currency" binding:"required,currency"`
 }
 
+// createAccount opens a new account for the authenticated user, one per currency.
+// @Summary Open an account
+// @Tags accounts
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body createAccountRequest true "Currency (USD, EUR, or CAD)"
+// @Success 200 {object} db.Account
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string "an account in this currency already exists for this owner"
+// @Failure 500 {object} map[string]string
+// @Router /accounts [post]
 func (server *Server) createAccount(ctx *gin.Context) {
 	var req createAccountRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -45,6 +58,18 @@ type getAccountRequest struct {
 	ID int64 `uri:"id" binding:"required,min=1"`
 }
 
+// getAccount fetches one account by id. The account must belong to the caller.
+// @Summary Get an account by id
+// @Tags accounts
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Account ID"
+// @Success 200 {object} db.Account
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string "account doesn't belong to the authenticated user"
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /accounts/{id} [get]
 func (server *Server) getAccount(ctx *gin.Context) {
 	var req getAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
@@ -78,6 +103,18 @@ type listAccountRequest struct {
 	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
 
+// listAccounts pages through the authenticated user's own accounts.
+// @Summary List your accounts
+// @Tags accounts
+// @Produce json
+// @Security BearerAuth
+// @Param page_id query int true "Page number, starting at 1"
+// @Param page_size query int true "Accounts per page, 5-10"
+// @Success 200 {array} db.Account
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /accounts [get]
 func (server *Server) listAccounts(ctx *gin.Context) {
 	var req listAccountRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
@@ -114,6 +151,18 @@ type lookupAccountResponse struct {
 // sender can address a transfer by who they're sending to instead of
 // needing to already know a raw account id. Only the id is returned, not
 // the account's balance or other details.
+// @Summary Look up an account id by owner + currency
+// @Tags accounts
+// @Produce json
+// @Security BearerAuth
+// @Param owner query string true "Username of the account owner"
+// @Param currency query string true "Currency (USD, EUR, or CAD)"
+// @Success 200 {object} lookupAccountResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string "no account for that owner+currency"
+// @Failure 500 {object} map[string]string
+// @Router /accounts/lookup [get]
 func (server *Server) lookupAccount(ctx *gin.Context) {
 	var req lookupAccountRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {

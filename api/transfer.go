@@ -17,6 +17,21 @@ type transferRequest struct {
 	Currency      string `json:"currency" binding:"required,currency"`
 }
 
+// createTransfer moves money between two accounts of the same currency.
+// from_account_id must belong to the authenticated user.
+// @Summary Transfer money between accounts
+// @Tags transfers
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body transferRequest true "Transfer details"
+// @Success 200 {object} db.TransferTxResult
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string "from_account_id doesn't belong to the authenticated user"
+// @Failure 404 {object} map[string]string "from or to account not found"
+// @Failure 422 {object} map[string]string "insufficient balance in from_account_id"
+// @Failure 500 {object} map[string]string
+// @Router /transfers [post]
 func (server *Server) createTransfer(ctx *gin.Context) {
 	var req transferRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {

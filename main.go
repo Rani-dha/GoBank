@@ -13,6 +13,14 @@ import (
 	"GoBank/util"
 )
 
+// @title GoBank API
+// @version 1.0
+// @description REST API for a simple banking system: register, log in, open accounts, and transfer money.
+// @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "bearer" followed by a space and the access token, e.g. "bearer eyJhbGciOi...".
 func main() {
 	config, err := util.LoadConfig(".")
 	if err != nil {

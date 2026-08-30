@@ -20,6 +20,18 @@ type renewAccessTokenResponse struct {
 	AccessTokenExpiresAt time.Time `json:"access_token_expires_at"`
 }
 
+// renewAccessToken issues a new access token from a still-valid refresh token.
+// @Summary Renew an access token
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body renewAccessTokenRequest true "Refresh token"
+// @Success 200 {object} renewAccessTokenResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string "invalid, blocked, mismatched, or expired session"
+// @Failure 404 {object} map[string]string "session not found"
+// @Failure 500 {object} map[string]string
+// @Router /tokens/renew_access [post]
 func (server *Server) renewAccessToken(ctx *gin.Context) {
 	var req renewAccessTokenRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
