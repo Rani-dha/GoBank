@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -51,6 +52,7 @@ func (server *Server) setupRouter() {
 	authRoutes.POST("/accounts", server.createAccount)
 	authRoutes.GET("/accounts/:id", server.getAccount)
 	authRoutes.GET("/accounts", server.listAccounts)
+	authRoutes.GET("/accounts/lookup", server.lookupAccount)
 
 	authRoutes.POST("/transfers", server.createTransfer)
 
@@ -60,6 +62,13 @@ func (server *Server) setupRouter() {
 // Start runs the HTTP server on a specific address.
 func (server *Server) Start(address string) error {
 	return server.router.Run(address)
+}
+
+// Handler returns the server's router as an http.Handler, so callers can
+// wrap it with their own middleware (CORS, logging) and manage its
+// lifecycle directly instead of using Start.
+func (server *Server) Handler() http.Handler {
+	return server.router
 }
 
 func errorResponse(err error) gin.H {

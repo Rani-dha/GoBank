@@ -8,9 +8,23 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// topUpAccount adds amount to an account's balance and returns the updated
+// row. Used so transfer tests aren't flaky against TransferTx's
+// insufficient-funds check when createRandomAccount's random starting
+// balance happens to be too low for the amounts a test sends.
+func topUpAccount(t *testing.T, accountID int64, amount int64) Account {
+	account, err := testStore.AddAccountBalance(context.Background(), AddAccountBalanceParams{
+		ID:     accountID,
+		Amount: amount,
+	})
+	require.NoError(t, err)
+	return account
+}
+
 func TestTransferTx(t *testing.T) {
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
+	account1 = topUpAccount(t, account1.ID, 100000)
 	fmt.Println(">> before:", account1.Balance, account2.Balance)
 
 	n := 5
@@ -116,6 +130,8 @@ func TestTransferTx(t *testing.T) {
 func TestTransferTxDeadlock(t *testing.T) {
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
+	account1 = topUpAccount(t, account1.ID, 100000)
+	account2 = topUpAccount(t, account2.ID, 100000)
 	fmt.Println(">> before:", account1.Balance, account2.Balance)
 
 	n := 10

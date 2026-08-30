@@ -23,6 +23,10 @@ ORDER BY id
 LIMIT $2
 OFFSET $3;
 
+-- name: GetAccountByOwnerAndCurrency :one
+SELECT * FROM accounts
+WHERE owner = $1 AND currency = $2 LIMIT 1;
+
 -- name: UpdateAccount :one
 UPDATE accounts
 SET balance = $2

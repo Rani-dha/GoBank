@@ -26,6 +26,33 @@ func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (Tr
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
+		// Lock both accounts (in a consistent order, to avoid deadlocking
+		// against a concurrent transfer between the same two accounts) and
+		// check the sender's balance under that lock, so two concurrent
+		// transfers can't both pass the check and overdraw the account.
+		var fromAccount Account
+		if arg.FromAccountID < arg.ToAccountID {
+			fromAccount, err = q.GetAccountForUpdate(ctx, arg.FromAccountID)
+			if err != nil {
+				return err
+			}
+			if _, err = q.GetAccountForUpdate(ctx, arg.ToAccountID); err != nil {
+				return err
+			}
+		} else {
+			if _, err = q.GetAccountForUpdate(ctx, arg.ToAccountID); err != nil {
+				return err
+			}
+			fromAccount, err = q.GetAccountForUpdate(ctx, arg.FromAccountID)
+			if err != nil {
+				return err
+			}
+		}
+
+		if fromAccount.Balance < arg.Amount {
+			return ErrInsufficientFunds
+		}
+
 		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{
 			FromAccountID: arg.FromAccountID,
 			ToAccountID:   arg.ToAccountID,

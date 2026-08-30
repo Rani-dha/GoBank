@@ -1,2 +1,5 @@
 # Ignore the generated sqlc folder
 # /db/sqlc/
+
+# Local Claude Code skills — not part of the app, not for the remote
+.claude/

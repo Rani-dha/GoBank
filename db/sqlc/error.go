@@ -14,6 +14,10 @@ const (
 
 var ErrRecordNotFound = pgx.ErrNoRows
 
+// ErrInsufficientFunds is returned by TransferTx when the source account's
+// balance is less than the requested transfer amount.
+var ErrInsufficientFunds = errors.New("account balance is insufficient for this transfer")
+
 var ErrUniqueViolation = &pgconn.PgError{
 	Code: UniqueViolation,
 }

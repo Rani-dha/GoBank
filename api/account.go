@@ -100,3 +100,40 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, accounts)
 }
+
+type lookupAccountRequest struct {
+	Owner    string `form:"owner" binding:"required"`
+	Currency string `form:"currency" binding:"required,currency"`
+}
+
+type lookupAccountResponse struct {
+	ID int64 `json:"id"`
+}
+
+// lookupAccount resolves a (username, currency) pair to an account id, so a
+// sender can address a transfer by who they're sending to instead of
+// needing to already know a raw account id. Only the id is returned, not
+// the account's balance or other details.
+func (server *Server) lookupAccount(ctx *gin.Context) {
+	var req lookupAccountRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	account, err := server.store.GetAccountByOwnerAndCurrency(ctx, db.GetAccountByOwnerAndCurrencyParams{
+		Owner:    req.Owner,
+		Currency: req.Currency,
+	})
+	if err != nil {
+		if errors.Is(err, db.ErrRecordNotFound) {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, lookupAccountResponse{ID: account.ID})
+}
